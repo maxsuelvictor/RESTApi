@@ -127,3 +127,8 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# jwt
+
+SECRET_KEY_JWT = "a_sua_chave_aqui"
+ACCESS_TOKEN_EXPIRE = 30 # Minutos

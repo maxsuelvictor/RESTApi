@@ -1,24 +1,35 @@
 from ninja import Router
 from .schemas import Produto
-from django.http import HttpRequest, HttpResponse
-from time import sleep
+from django.contrib import auth
+from django.http import JsonResponse
+from django.conf import settings
+from datetime import datetime, timedelta
+import jwt
 
 produtos_router = Router()
 
-# @produtos_router.post('/')
-# Especificando o auth=None, a chamada desse endpoint não irá passar pela
-# autenticação, a escolha é sua
-@produtos_router.get('/', auth=None)
-def get_teste(request, response: HttpResponse):
-    return {'id_item':1 }
-    #print(produto.id_item)
-
-    # Se for usar a autenticação o código deve ter o request abaixo
-    #return {'id_item': 1, 'request': request.auth}
+class Usuario(Produto):
+    username: str
+    senha: str
 
 
- #Exemplo de post
-@produtos_router.post('/')
-def post_teste(request):
-    #print(produto.id_item)
-    return  {'id_item': 1}
+@produtos_router.post('/login/')
+def login(request, usuario: Usuario):
+
+    user = auth.authenticate(request, username=usuario.username,
+                             password=usuario.senha)
+
+
+    if not user:
+        return JsonResponse({'error': 'E-mail ou senha inválidos'})
+
+
+    expiration_time = datetime.now() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE)
+    payload = {
+        'user': user.username,
+        'exp':  expiration_time.isoformat()
+    }
+
+    token = jwt.encode(payload, settings.SECRET_KEY_JWT, algorithm="HS256")
+
+    return {'token': token}
